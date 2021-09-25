@@ -5,14 +5,14 @@ Python project to create heat maps using IMDB rating data.
 ![](images/silicon_valley.png)
 
 ## Specs:
-  - Season by columns
-  - Episodes by rows
+  - Season along columns
+  - Episodes along rows
   - Ratings in the table
-  - Rating gradiant based on 0 (red) to 10 (green)
+  - Rating gradiant goes from 0 (red) to 10 (green)
 
 # Data sources
-https://www.imdb.com/interfaces/
-https://datasets.imdbws.com/
+  - https://www.imdb.com/interfaces/
+  - https://datasets.imdbws.com/
 
 # To do
   - Create parser to read imdb data sources
