@@ -69,31 +69,28 @@ def get_episodes(season_url):
         season[sea_pair] = details
     return season
 
-base_url = "https://www.imdb.com/title/tt0903747/episodes?season="
-
-for x in range(1,6):
-    season_url = base_url + str(x)
-    data = get_episodes(season_url)
+def main():
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, "title.episode.tsv")
     
-    with open('C:\\Users\\phngu\\dev\\imdb\\sample.txt', 'a') as dfile:
-        dfile.write(json.dumps(data))
-        dfile.write('\n')
+    df = pd.read_csv(file_path, sep='\t')
+    unique = df['parentTconst'].unique()
+    print(unique, len(unique), len(df['parentTconst']))
+
+if __name__ == "__main__":
+    main()
 
 
+# BASE_URL = "https://www.imdb.com/"
+# show_url = BASE_URL + "/title/" + ""
+# episode_url = show_url + "/episodes?season=" 
+# link = "https://www.imdb.com/title/tt2861424/episodes?season=1"
+# print(get_season(link))
 
-# def main():
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     file_path = os.path.join(dir_path, "title.episode.tsv")
-    
-#     df = pd.read_csv(file_path, sep='\t')
-#     unique = df['parentTconst'].unique()
-#     print(unique, len(unique), len(df['parentTconst']))
-
-# # BASE_URL = "https://www.imdb.com/"
-# # show_url = BASE_URL + "/title/" + ""
-# # episode_url = show_url + "/episodes?season=" 
-# # link = "https://www.imdb.com/title/tt2861424/episodes?season=1"
-# # print(get_season(link))
-
-# if __name__ == "__main__":
-#     main()
+# base_url = "https://www.imdb.com/title/tt0903747/episodes?season="
+# for x in range(1,6):
+#     season_url = base_url + str(x)
+#     data = get_episodes(season_url)
+#     with open('C:\\Users\\phngu\\dev\\imdb\\sample.txt', 'a') as dfile:
+#         dfile.write(json.dumps(data))
+#         dfile.write('\n')
