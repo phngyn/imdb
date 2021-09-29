@@ -13,6 +13,8 @@ Python project to create heat maps using IMDB rating data.
 # Data sources
   - https://www.imdb.com/interfaces/
   - https://datasets.imdbws.com/
+Reminder: add documentation on datasets here.
+
 
 # To do
   - Create parser to read imdb data sources
