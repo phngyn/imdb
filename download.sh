@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Linux download script
 Source="dataurls.txt"
 Lines=$(cat $Source)
 for Line in $Lines
