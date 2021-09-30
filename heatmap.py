@@ -1,96 +1,53 @@
-import os
-import json
-import re
-import time
-import requests
+from matplotlib.pyplot import xlabel, ylabel
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib as plt
 import pdb
 
-import pandas as pd
-from bs4 import BeautifulSoup as bs
-
-class TvShow():
-    def get_season_episode():
-        pass
-
-    def get_ep_title():
-        pass
-
-    def get_ep_rating():
-        pass
-
-    def get_ep_rating_count():
-        pass
-
-    def get_ep_airdate():
-        pass
-
-    def get_ep_description():
-        pass
+rating_src = "./data/title.ratings.tsv"
+episode_src = "./data/title.episode.tsv"
+show = "tt0903747"
 
 
-def get_seasons(show_url):
-    http_response = requests.get(show_url)
-    soup_html = bs(http_response.text, "html.parser")
-    try:
-        seasons = soup_html.find("select", {"class":"ipc-simple-select__input"}).get_text().split("See all")
-        return list(seasons[0])
-    except: # pylint: disable=W0702
-        return 0
+def get_rating(source, episodes):
+    # takes multiple episodes
+    # returns df of episode ratings and votes
+    with open(source) as dfile:
+        df = pd.read_csv(dfile, sep='\t', encoding='utf8')
+        df_episodes = df.loc[df['tconst'].isin(episodes)]
+    return df_episodes
 
-def get_seasons(show_url):
-    http_response = requests.get(show_url)
-    soup_html = bs(http_response.text, "html.parser")
-    sums = []
-    try:
-        description = soup_html.find_all("div", {"class":"item_description"})
-        for desc in description:
-            sums.append(desc.value)
-        return sums
-    except:
-        return -1
+def get_episodes(source, show):
+    # load title.episode.tsv
+    # filter parentTconst (col 2) for show
+    # return list of seasons and episodes
+    with open(source) as dfile:
+        df = pd.read_csv(dfile, sep='\t', encoding='utf8')
+        df_show = df.loc[df['parentTconst'] == show]
+        df_show = df_show.astype({'seasonNumber': 'int32', 'episodeNumber': 'int32'})
+        df_show = df_show.sort_values(by=['seasonNumber', 'episodeNumber'])
+    return df_show
 
+def gen_heatmap(ratings):
+    # create dataframe with show ratings
+    # make seasons as headers
+    # make episodes as rows
+    # plot color based on rating from 0 to 10 
+    pass
 
-def get_episodes(season_url):
-    http_response = requests.get(season_url)
-    soup_html = bs(http_response.text, "html.parser")
-    episodes = soup_html.find_all("div", {"class":"list_item"})
+epi = get_episodes(episode_src, show)
+epi_list = epi['tconst'].tolist()
+epi_rating = get_rating(rating_src, epi_list)
+epi_merge = epi.merge(epi_rating, on='tconst', how='outer')
+epi_drop = epi_merge.dropna()
+print(epi_drop)
 
-    season = {}    
+epi_map = epi_drop.pivot('episodeNumber', 'seasonNumber', 'averageRating')
+# pdb.set_trace()
+map = sns.heatmap(epi_map, annot=True, linewidths=0.5)
+map.set(xlabel='Seasons', ylabel='Episodes')
+# svm = sn.heatmap(df_cm, annot=True,cmap='coolwarm', linecolor='white', linewidths=1)
 
-    for episode in episodes:
-        details = {}
-        sea_pair = episode.find_next("div").get_text().strip()
-        details["episode"] = episode.find_next("meta", {"itemprop":"episodeNumber"})['content']
-        details["airdate"] = episode.find_next("div", {"class":"airdate"}).get_text().strip()
-        details["title"] = episode.find_next("a", {"itemprop":"name"})["title"]
-        details["rating"] = episode.find_next("span", {"class":"ipl-rating-star__rating"}).get_text().strip()
-        details["ratecount"] = episode.find_next("span", {"class":"ipl-rating-star__total-votes"}).get_text().strip('()')
-        details["description"] = episode.find_next("div", {"class":"item_description"}).get_text().strip()
-        season[sea_pair] = details
-    return season
-
-def main():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, "title.episode.tsv")
-    
-    df = pd.read_csv(file_path, sep='\t')
-    unique = df['parentTconst'].unique()
-    print(unique, len(unique), len(df['parentTconst']))
-
-if __name__ == "__main__":
-    main()
-
-
-# BASE_URL = "https://www.imdb.com/"
-# show_url = BASE_URL + "/title/" + ""
-# episode_url = show_url + "/episodes?season=" 
-# link = "https://www.imdb.com/title/tt2861424/episodes?season=1"
-# print(get_season(link))
-
-# base_url = "https://www.imdb.com/title/tt0903747/episodes?season="
-# for x in range(1,6):
-#     season_url = base_url + str(x)
-#     data = get_episodes(season_url)
-#     with open('C:\\Users\\phngu\\dev\\imdb\\sample.txt', 'a') as dfile:
-#         dfile.write(json.dumps(data))
-#         dfile.write('\n')
+figure = map.get_figure()    
+figure.savefig(show+'.png', dpi=600)
