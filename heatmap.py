@@ -2,12 +2,15 @@ from matplotlib.pyplot import xlabel, ylabel
 import pandas as pd
 import numpy as np
 import seaborn as sns
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import pdb
+import requests
+
+from bs4 import BeautifulSoup as bs
 
 rating_src = "./data/title.ratings.tsv"
 episode_src = "./data/title.episode.tsv"
-show = "tt0903747"
+show = "tt0096697"
 
 
 def get_rating(source, episodes):
@@ -29,6 +32,15 @@ def get_episodes(source, show):
         df_show = df_show.sort_values(by=['seasonNumber', 'episodeNumber'])
     return df_show
 
+def get_show_name(show_url):
+    http_response = requests.get(show_url)
+    soup_html = bs(http_response.text, "html.parser")
+    try:
+        show_title = soup_html.find("h1", {"data-testid":"hero-title-block__title"}).get_text()
+        return str(show_title)
+    except: # pylint: disable=W0702
+        return 0
+
 def gen_heatmap(ratings):
     # create dataframe with show ratings
     # make seasons as headers
@@ -40,14 +52,17 @@ epi = get_episodes(episode_src, show)
 epi_list = epi['tconst'].tolist()
 epi_rating = get_rating(rating_src, epi_list)
 epi_merge = epi.merge(epi_rating, on='tconst', how='outer')
-epi_drop = epi_merge.dropna()
+epi_drop = epi_merge#.dropna()
 print(epi_drop)
+
+show_name = get_show_name('https://www.imdb.com/title/'+show)
 
 epi_map = epi_drop.pivot('episodeNumber', 'seasonNumber', 'averageRating')
 # pdb.set_trace()
 map = sns.heatmap(epi_map, annot=True, linewidths=0.5)
-map.set(xlabel='Seasons', ylabel='Episodes')
+map.set(xlabel='Seasons', ylabel='Episodes', title=show_name)
 # svm = sn.heatmap(df_cm, annot=True,cmap='coolwarm', linecolor='white', linewidths=1)
+# plt.show()
 
 figure = map.get_figure()    
-figure.savefig(show+'.png', dpi=600)
+figure.savefig('./heatmaps/'+show_name+'.png', dpi=200)
