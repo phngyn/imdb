@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup as bs
 
 rating_src = "./data/title.ratings.tsv"
 episode_src = "./data/title.episode.tsv"
-show = "tt0096697"
+show = "tt0052520"
 
 
 def get_rating(source, episodes):
@@ -55,14 +55,17 @@ epi_merge = epi.merge(epi_rating, on='tconst', how='outer')
 epi_drop = epi_merge#.dropna()
 print(epi_drop)
 
-show_name = get_show_name('https://www.imdb.com/title/'+show)
-
+show_name = get_show_name('https://www.imdb.com/title/'+show).replace(':','')
+size = (epi_drop['seasonNumber'].max()//2+1, epi_drop['episodeNumber'].max()//2+1)
+# pdb.set_trace()
 epi_map = epi_drop.pivot('episodeNumber', 'seasonNumber', 'averageRating')
 # pdb.set_trace()
+# sns.set(rc={'figure.figsize':size})
 map = sns.heatmap(epi_map, annot=True, linewidths=0.5)
+# pdb.set_trace()
 map.set(xlabel='Seasons', ylabel='Episodes', title=show_name)
 # svm = sn.heatmap(df_cm, annot=True,cmap='coolwarm', linecolor='white', linewidths=1)
 # plt.show()
 
 figure = map.get_figure()    
-figure.savefig('./heatmaps/'+show_name+'.png', dpi=200)
+figure.savefig('./heatmaps/'+show_name+'.png', dpi=300)
