@@ -1,6 +1,7 @@
 from matplotlib.pyplot import xlabel, ylabel
 import pandas as pd
 import numpy as np
+from pandas.core.frame import DataFrame
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pdb
@@ -8,31 +9,27 @@ import requests
 
 from bs4 import BeautifulSoup as bs
 
-rating_src = "./data/title.ratings.tsv"
-episode_src = "./data/title.episode.tsv"
-show = "tt0052520"
-
-
-def get_rating(source, episodes):
+def get_ratings(data_source: str, episode_ids: pd.DataFrame) -> pd.DataFrame:
     # takes multiple episodes
     # returns df of episode ratings and votes
-    with open(source) as dfile:
+    episode_list = episode_ids['tconst'].tolist()
+    with open(data_source) as dfile:
         df = pd.read_csv(dfile, sep='\t', encoding='utf8')
-        df_episodes = df.loc[df['tconst'].isin(episodes)]
+        df_episodes = df.loc[df['tconst'].isin(episode_list)]
     return df_episodes
 
-def get_episodes(source, show):
+def get_episodes(data_source: str, show_id: str) -> pd.DataFrame:
     # load title.episode.tsv
     # filter parentTconst (col 2) for show
     # return list of seasons and episodes
-    with open(source) as dfile:
+    with open(data_source) as dfile:
         df = pd.read_csv(dfile, sep='\t', encoding='utf8')
-        df_show = df.loc[df['parentTconst'] == show]
+        df_show = df.loc[df['parentTconst'] == show_id]
         df_show = df_show.astype({'seasonNumber': 'int32', 'episodeNumber': 'int32'})
         df_show = df_show.sort_values(by=['seasonNumber', 'episodeNumber'])
     return df_show
 
-def get_show_name(show_url):
+def get_show_name(show_url: str) -> str:
     http_response = requests.get(show_url)
     soup_html = bs(http_response.text, "html.parser")
     try:
@@ -41,31 +38,41 @@ def get_show_name(show_url):
     except: # pylint: disable=W0702
         return 0
 
-def gen_heatmap(ratings):
+def gen_rating_map():
+    pass
+
+def gen_heatmap(rating_map):
     # create dataframe with show ratings
     # make seasons as headers
     # make episodes as rows
-    # plot color based on rating from 0 to 10 
+    # plot color based on rating from 0 to 10
     pass
 
-epi = get_episodes(episode_src, show)
-epi_list = epi['tconst'].tolist()
-epi_rating = get_rating(rating_src, epi_list)
-epi_merge = epi.merge(epi_rating, on='tconst', how='outer')
-epi_drop = epi_merge#.dropna()
-print(epi_drop)
+def main():
+    src_ratings = "./data/title.ratings.tsv"
+    src_episodes = "./data/title.episode.tsv"
+    show_id = "tt0386676"
 
-show_name = get_show_name('https://www.imdb.com/title/'+show).replace(':','')
-size = (epi_drop['seasonNumber'].max()//2+1, epi_drop['episodeNumber'].max()//2+1)
-# pdb.set_trace()
-epi_map = epi_drop.pivot('episodeNumber', 'seasonNumber', 'averageRating')
-# pdb.set_trace()
-# sns.set(rc={'figure.figsize':size})
-map = sns.heatmap(epi_map, annot=True, linewidths=0.5)
-# pdb.set_trace()
-map.set(xlabel='Seasons', ylabel='Episodes', title=show_name)
-# svm = sn.heatmap(df_cm, annot=True,cmap='coolwarm', linecolor='white', linewidths=1)
-# plt.show()
+    episodes = get_episodes(src_episodes, show_id)
+    episode_ratings = get_ratings(src_ratings, episodes)
+    df_merged = episodes.merge(episode_ratings, on='tconst', how='outer')
+    # df_merged_dropna = df_merged.dropna()
+    # print(df_merged_dropna)
 
-figure = map.get_figure()    
-figure.savefig('./heatmaps/'+show_name+'.png', dpi=300)
+    show_name = get_show_name('https://www.imdb.com/title/'+show_id).replace(':','')
+    # size = (df_merged['seasonNumber'].max()//2+1, df_merged['episodeNumber'].max()//2+1)
+
+    df_mapped = df_merged.pivot('episodeNumber', 'seasonNumber', 'averageRating')
+
+    # sns.set(rc={'figure.figsize':size})
+    map = sns.heatmap(df_mapped, annot=True, linewidths=0.5)
+    map.set(xlabel='Seasons', ylabel='Episodes', title=show_name)
+    plt.show()
+
+    figure = map.get_figure()    
+    figure.savefig('./heatmaps/'+show_name+'.png', dpi=300)
+
+    return 0
+
+if __name__ == "__main__":
+    main()
