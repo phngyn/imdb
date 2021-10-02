@@ -30,11 +30,11 @@ source .env/bin/activate # .\env\Scripts\activate for Windows
 # Install seaborn (includes pandas), requests, and beautifulsoup4
 pip install -r requirements.txt
 ```
-Seaborn is a Python data visualization library based on matplotlib. It provides a high-level interface for drawing attractive and informative statistical graphics. We use it for the heatmap function.
-
 Pandas is a powerful open source data analysis and manipulation tool. We use it to work with the IMDb datasets and prepare our heatmap dataframe.
 
-Reuqests is a Python library to work with HTTP and BeautifulSoup is a Python library to work with HTML and XML files. We use these packages to read the IMDb page for the show name (parent show name is not included in any dataset).
+Seaborn is a Python data visualization library based on matplotlib. It provides a high-level interface for drawing attractive and informative statistical graphics. We use Seaborn's heatmap function to visualize our ratings dataframe.
+
+Requests is a Python library to work with HTTP and BeautifulSoup is a Python library to work with HTML and XML files. We use these packages to read the IMDb page for the show name (parent show name is not included in any dataset).
 
 
 ## Download datasets:
