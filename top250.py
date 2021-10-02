@@ -1,24 +1,20 @@
 import requests
-import pdb
 from bs4 import BeautifulSoup as bs
 
-url = "https://www.imdb.com/chart/toptv/"
-def get_shows(show_url):
+def get_top250(show_url = 'https://www.imdb.com/chart/toptv/'):
     show_list = []
     http_response = requests.get(show_url)
-    soup_html = bs(http_response.text, "html.parser")
+    soup_html = bs(http_response.text, 'html.parser')
     try:
         shows = soup_html.find_all('td', {'class': 'titleColumn'})
         for link in shows:
-            # pdb.set_trace()
             title = link.get_text().replace('\n','').strip()
-            show_list.append(link.a['href']) #str(title) + '\t' + 
+            show_list.append(str(title) + '\t' + link.a['href']) 
         return show_list
     except: # pylint: disable=W0702
         return 0
 
-shows = get_shows(url)
-
-with open('top250-2.txt', 'w') as wfile:
+with open('top250.txt', 'w') as wfile:
+    shows = get_top250()
     for show in shows:
         wfile.write(str(show+'\n'))

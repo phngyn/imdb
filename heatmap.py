@@ -1,10 +1,6 @@
-from matplotlib.pyplot import xlabel, ylabel
 import pandas as pd
-import numpy as np
-from pandas.core.frame import DataFrame
 import seaborn as sns
 import matplotlib.pyplot as plt
-import pdb
 import requests
 
 from bs4 import BeautifulSoup as bs
@@ -60,9 +56,6 @@ def get_episode_details(season_url):
         season[sea_pair] = details
     return season
 
-def gen_rating_map():
-    pass
-
 def make_heatmap(show_id):
     show_name = get_show_name(show_id)
     episodes = get_episodes(show_id)
@@ -70,19 +63,21 @@ def make_heatmap(show_id):
     df_merged = episodes.merge(episode_ratings, on='tconst', how='outer')
     df_mapped = df_merged.pivot('episodeNumber', 'seasonNumber', 'averageRating')
     # size = (df_merged['seasonNumber'].max()//2+1, df_merged['episodeNumber'].max()//2+1)
-    # sns.set(rc={'figure.figsize':size})
-    map = sns.heatmap(df_mapped, annot=True, linewidths=0.5, square=True, vmin=0, vmax=10)
+    sns.set(rc={'figure.figsize': (1920/120, 1080/120)})
+    plt.tight_layout()
+    map = sns.heatmap(df_mapped, annot=True, linewidths=0.5, square=False) # vmin=0, vmax=10
     map.set(xlabel='Seasons', ylabel='Episodes', title=show_name)
     figure = map.get_figure()
-    figure.savefig('./heatmaps/' + show_name+ ' - ' + show_id + '.png', dpi=200, pad_inches='0.1')
+    save_name = './heatmaps/' + show_name.replace(' ', '_') + '_' + show_id + '.png'
+    figure.savefig(save_name, dpi=120, pad_inches='0.1')
 
     return 0
 
 
 def main():
-    show_ids = ["tt0417299"]
+    show_id = ["tt0306414"]
 
-    for id in show_ids:
+    for id in show_id:
         try:
             make_heatmap(id)
         except:
