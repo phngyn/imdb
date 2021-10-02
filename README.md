@@ -2,7 +2,7 @@
 Python project to create heat maps using IMDB rating data.
 
 # Example
-![](images/silicon_valley.png)
+![](images/Breaking Bad - tt0903747.png) {width: 400px;}
 
 ## Specs:
   - Season along columns

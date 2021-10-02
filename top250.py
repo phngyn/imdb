@@ -12,13 +12,13 @@ def get_shows(show_url):
         for link in shows:
             # pdb.set_trace()
             title = link.get_text().replace('\n','').strip()
-            show_list.append(str(title) + '\t' + link.a['href'])
+            show_list.append(link.a['href']) #str(title) + '\t' + 
         return show_list
     except: # pylint: disable=W0702
         return 0
 
 shows = get_shows(url)
 
-with open('top250.txt', 'w') as wfile:
+with open('top250-2.txt', 'w') as wfile:
     for show in shows:
         wfile.write(str(show+'\n'))
