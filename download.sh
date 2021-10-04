@@ -1,12 +1,18 @@
 #!/bin/bash
 
-mkdir "./data/"
+# make local data directory
+DIR_DATA="./data/"
+
+if [ ! -d "$DIR_DATA" ]; then
+	mkdir "./data/"
+fi
+
 # download script
 BASE_URL="https://datasets.imdbws.com/" 
 DATASETS=("title.episode.tsv.gz" "title.ratings.tsv.gz") 
 
 for DS in "${DATASETS[@]}"; do
-	curl -o "./data/$DS" "$BASE_URL$DS"
+	curl -o "$DIR_DATA$DS" "$BASE_URL$DS"
 done
 
 gzip -d ./data/*.gz
